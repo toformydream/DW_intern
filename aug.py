@@ -14,11 +14,11 @@ import natsort
 
 
 def main():
-    files = files_count("crop_art_knife_2")
-    json_dic, json_data = load_json('json/crop_data.json')
-    resize_upload_image('crop_art_knife_2', json_data, json_dic)
-    json_dic, json_data = load_json('json/crop_data.json')
-    draw_ground_truth('crop_art_knife_2', json_data, json_dic)
+    files = files_count("crop_jackknife")
+    json_dic, json_data = load_json('json/jackknife_crop_data.json')
+    resize_upload_image('crop_jackknife', json_data, json_dic)
+    json_dic, json_data = load_json('json/jackknife_crop_data.json')
+    draw_ground_truth('crop_jackknife', json_data, json_dic)
 
 
 
@@ -78,7 +78,7 @@ def resize_upload_image(file_path, json_data, json_dic):
                     json_data['images'].append({  # json파일에서 image 부분 append
                         'id': files_amount + plus_number,
                         'dataset_id': 1,
-                        'path': 'D:/KJE_Airiss/Police_data/xray/data/xray_artknife_a_2/crop/' + str(
+                        'path': 'D:/KJE_Airiss/Police_data/xray/data/xray_jackknife_b_1/crop/' + str(
                             files_amount + plus_number) + '.png',
                         'file_name': str(files_amount + plus_number) + '.png',
                         'width': w,
@@ -99,7 +99,7 @@ def resize_upload_image(file_path, json_data, json_dic):
                         'weight': None})
                     add_number = add_number+1
                     plus_number += 1
-    with open('json/crop_data.json', "w", encoding="UTF-8") as file:  # pc : poice
+    with open('json/jackknife_crop_data.json', "w", encoding="UTF-8") as file:  # pc : poice
         json.dump(json_data, file, indent=4)
 
 
@@ -128,9 +128,10 @@ def draw_ground_truth(file_path, json_data, json_dic):
         img = cv2.fillPoly(img, [result], (0, 0, 255))
         img = cv2.rectangle(img, (bbox[0], bbox[1]), (bbox[2], bbox[3]), (0, 255, 0), 3)
         dst=cv2.addWeighted(img,0.2,img_copy,0.8,0)
-        cv2.imshow('ing', dst)
-        cv2.waitKey()
-        cv2.destroyAllWindows()
+        cv2.imwrite(f"ground_crop_art_knife_2/{file_number}.png", dst)
+        # cv2.imshow(f"{file_number}.png", dst)
+        # cv2.waitKey()
+        # cv2.destroyAllWindows()
 
 
 if __name__ == '__main__':
