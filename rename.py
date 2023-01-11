@@ -10,7 +10,7 @@ def main():
         files_count(f"crop_artknife_{folder_number}")
         img = cv2.imread(f"crop_artknife_{folder_number}/{file_number}.png")
         cv2.imwrite('knife_data_file', f"{image_number}.png", img)
-
+#
 if __name__ == '__main__':
     main()
 
