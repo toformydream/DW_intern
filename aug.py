@@ -133,6 +133,6 @@ def draw_ground_truth(file_path, json_data, json_dic):
         # cv2.waitKey()
         # cv2.destroyAllWindows()
 
-
+#
 if __name__ == '__main__':
     main()
