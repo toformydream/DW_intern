@@ -4,6 +4,9 @@
 3. 이미지 3개씩 resize o
 4. resize 이미지 json파일에 데이터 업로드 o
 5. bbox, segmentation 이미지에 만들기
+6. 각각의 json파일, 폴더에서 3배로 resize하고 하나의 json파일, 하나의 폴더에 에 ground_truth만 저장하는 방식, json파일 합쳐야함
+신경써야할 부분은
+{1. ground_truth될 파일이나 json id로 업로드 될 숫자들이 잘 갱신 되는지}
 '''
 import json
 import cv2
@@ -14,13 +17,19 @@ import natsort
 
 
 def main():
-    files = files_count("crop_jackknife")
-    json_dic, json_data = load_json('json/jackknife_crop_data.json')
-    resize_upload_image('crop_jackknife', json_data, json_dic)
-    json_dic, json_data = load_json('json/jackknife_crop_data.json')
-    draw_ground_truth('crop_jackknife', json_data, json_dic)
+    file_list = ['art_knife', 'chief_knife', 'fruit_knife', 'jack_knife', 'steak_knife','swiss_army_knife']
+    img_amount = 0
+    for i in range(0,6):
+        files = files_count(str(file_list[i]))
+        json_dic, json_data = load_json('json/' + str(file_list[i]) + '.json')
+        folder_path = find_folder_path(str(file_list[i]))
+        resize_upload_image(str(file_list[i]), json_data, json_dic, img_amount)
+        json_dic, json_data = load_json('json/'+str(file_list[i])+'.json')
+        draw_ground_truth(file_list[i], json_data, json_dic)
 
-
+def find_folder_path(path):
+    a = ('json/'+str(path)+'.json')
+    return a
 
 def files_count(folder_path):  # 파일 갯수 카운트
     file_amount = os.listdir(folder_path)
@@ -45,7 +54,7 @@ def load_imgs(imgs_path):
 new_height = new_width = 0
 
 
-def resize_upload_image(file_path, json_data, json_dic):
+def resize_upload_image(file_path, json_data, json_dic, img_amount): # folder_path, json_data, json_dic, img_amount
     global new_height
     global new_width
     files_amount = files_count(file_path)
@@ -76,16 +85,16 @@ def resize_upload_image(file_path, json_data, json_dic):
                     resize_img = cv2.imread(file_path + '/' + str(files_amount + plus_number) + '.png')
                     h, w = resize_img.shape[:2]
                     json_data['images'].append({  # json파일에서 image 부분 append
-                        'id': files_amount + plus_number,
+                        'id': img_amount+ files_amount + plus_number,
                         'dataset_id': 1,
-                        'path': 'D:/KJE_Airiss/Police_data/xray/data/xray_jackknife_b_1/crop/' + str(
-                            files_amount + plus_number) + '.png',
-                        'file_name': str(files_amount + plus_number) + '.png',
+                        'path': 'D:/wp/DW_intern/knife_data_file' + str(
+                            img_amount+ files_amount + plus_number) + '.png',
+                        'file_name': str(img_amount+files_amount + plus_number) + '.png',
                         'width': w,
                         'height': h})
                     json_data['annotations'].append({  # json파일에서 annotation 부분 append
-                        'id': files_amount + plus_number + 1,
-                        'image_id': files_amount + plus_number + 1,
+                        'id': img_amount + files_amount + plus_number + 1,
+                        'image_id': img_amount + files_amount + plus_number + 1,
                         'category_id': 1,
                         'bbox': [0, 0, w, h],
                         'segmentation': [[new_seg]],
@@ -99,24 +108,21 @@ def resize_upload_image(file_path, json_data, json_dic):
                         'weight': None})
                     add_number = add_number+1
                     plus_number += 1
-    with open('json/jackknife_crop_data.json', "w", encoding="UTF-8") as file:  # pc : poice
+    with open('json/'+str(file_path)+'.json', "w", encoding="UTF-8") as file:
         json.dump(json_data, file, indent=4)
 
 
-def draw_ground_truth(file_path, json_data, json_dic):
+def draw_ground_truth(file_path, json_data, json_dic, img_amount): # 본인 폴더, 본인 json, 본인 dic ,
     files_amount = files_count(file_path)
     for file_number in range(files_amount):
-        img = cv2.imread(file_path + '/' + str(file_number) + '.png')
+        img = cv2.imread(file_path + f"/{file_number}")
         img_copy = img.copy()
         bbox = []
         h, w = img.shape[:2]
-        seg = json_data['annotations'][json_dic[str(file_number) + '.png']]['segmentation'][0][0]
+        seg = json_data['annotations'][json_dic[str(file_number+img_amount) + '.png']]['segmentation'][0][0]
         result = []
-        for i in range(0,
-                       len(json_data['annotations'][json_dic[str(file_number) + '.png']]['segmentation'][0][0]),
-                       2):
-            result.append(
-                json_data['annotations'][json_dic[str(file_number) + '.png']]['segmentation'][0][0][i:i + 2])
+        for i in range(0, len(json_data['annotations'][json_dic[str(file_number+img_amount) + '.png']]['segmentation'][0][0]),2):
+            result.append(json_data['annotations'][json_dic[str(file_number+img_amount) + '.png']]['segmentation'][0][0][i:i + 2])
         vector = np.vectorize(np.int_)
         result = np.array(result)
         result = vector(result)
@@ -127,8 +133,8 @@ def draw_ground_truth(file_path, json_data, json_dic):
             bbox.append(json_data['annotations'][json_dic[str(file_number) + '.png']]['bbox'][bbox_number])
         img = cv2.fillPoly(img, [result], (0, 0, 255))
         img = cv2.rectangle(img, (bbox[0], bbox[1]), (bbox[2], bbox[3]), (0, 255, 0), 3)
-        dst=cv2.addWeighted(img,0.2,img_copy,0.8,0)
-        cv2.imwrite(f"ground_crop_art_knife_2/{file_number}.png", dst)
+        dst = cv2.addWeighted(img,0.2,img_copy,0.8,0)
+        cv2.imwrite(file_path + str(file_number+img_amount) + '.png', dst)
         # cv2.imshow(f"{file_number}.png", dst)
         # cv2.waitKey()
         # cv2.destroyAllWindows()
