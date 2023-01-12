@@ -50,6 +50,19 @@ def load_imgs(imgs_path):
     sorted_img_list = natsort.natsorted(img_list)
     return sorted_img_list
 
+def combine_json(json_1_path, json_2_path): #큰게 앞으로
+    with open(json_1_path, "r") as file:
+        json_1_data = json.load(json_1_path)
+    with open(json_2_path, "r") as file:
+        json_2_data = json.load(json_2_path)
+    json_1_data.update(json_2_data)
+    return json_1_data
+
+
+
+
+
+
 
 new_height = new_width = 0
 
