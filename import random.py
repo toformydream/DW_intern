@@ -1,17 +1,5 @@
-def main():
-    b=0
-    for i in range(0,5):
-        b = a(b)
-        print(b)
-
-
-def a(a):
-    for i in range(0, 5):
-        b = 0
-        b = b + 3
-    a = a + b
-    return a
-
-if __name__ == '__main__':
-    main()
-
+train_list = ['art_knife', 'jack_knife', 'fruit_knife', 'steak_knife', 'swiss_army_knife', 'chief_knife']
+a = 'json/' + train_list[0]+'.json'
+b = 'json/art_knife.json'
+if a==b:
+    print('맞는데')

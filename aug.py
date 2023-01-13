@@ -1,13 +1,3 @@
-'''
-1. json 파일 불러오기 o
-2. json파일순서와 이미지 파일이 순서대로 되게끔 설정
-3. 이미지 3개씩 resize o
-4. resize 이미지 json파일에 데이터 업로드 o
-5. bbox, segmentation 이미지에 만들기
-6. 각각의 json파일, 폴더에서 3배로 resize하고 하나의 json파일, 하나의 폴더에 에 ground_truth만 저장하는 방식, json파일 합쳐야함
-신경써야할 부분은
-{1. ground_truth될 파일이나 json id로 업로드 될 숫자들이 잘 갱신 되는지}
-'''
 import json
 import cv2
 import numpy as np
