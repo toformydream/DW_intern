@@ -1,5 +1,9 @@
-train_list = ['art_knife', 'jack_knife', 'fruit_knife', 'steak_knife', 'swiss_army_knife', 'chief_knife']
-a = 'json/' + train_list[0]+'.json'
-b = 'json/art_knife.json'
-if a==b:
-    print('맞는데')
+import json
+import re
+a = "15년"
+new_a = re.findall('[0-9]+', a)
+print(new_a[0])
+print(type(int(new_a[0])))
+a = 10
+for i in range(10):
+    print (i)
