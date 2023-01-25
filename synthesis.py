@@ -54,7 +54,7 @@ def main():
             if i == 0:
                 cv2.imwrite(f"synthesis_high_data/{synthesis_image_number}.png", background)  # imwrite로 바꾸고 경로설정 다르게
                 cv2.imshow('h', background)
-            else:
+            else: # todo : 이미지 파일을 읽었을때는 제대로 나오는데 저장하면 이상한 이미지가 저장됨
                 cv2.imwrite(f"synthesis_low_data/{synthesis_image_number}.png", background)
                 cv2.imshow('l', background)
                 append_items_json(synthesis_data, synthesis_image_number, item_number, x, y, w, h, item_seg)
