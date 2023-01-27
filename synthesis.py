@@ -1,6 +1,7 @@
 import random
 import os
 import cv2
+import numpy as np
 import json
 
 '''
@@ -26,49 +27,103 @@ def main():
     synthesis_data['categories'] = []
     synthesis_image_number = 0
     item_seg = {}
+    name = ['knife','gun','laser_pointer','battery']
+    for i in range(0,4):
+        append_categories_json(synthesis_data,name,i)
     while synthesis_image_number < 10000:
+        append_files_json(synthesis_data, synthesis_image_number)
         items, l_items, img_number, item_seg = get_ramdom_img(item_seg)  # item 이미지와 이미지 넘버를 담은리스트
-        high_path, low_path = get_background_image()
-        background_list = [high_path, low_path]
-        # append_background_json(synthesis_data, synthesis_image_number, b_w, b_h)  # TODO : 랜덤으로 x,y좌표를 정해주는 코드를 두번 돌아가지 않도록, 10번 반복해서 2중 배열로 [0][x,y..]/[1][x,y..] 형태로 만들기
-        '''random_coordinate=[[6]]
-        background = cv2.imread(background_list[0])
-        for imgs in range(len(items)):
-            img = cv2.imread(items[imgs])  # item 10개 각각 img로
-            x, y, h, w, b_h, b_w = get_random_coordinate(img, background)
-            random_coordinate[imgs] = x,y,h,w,b_h,b_w
-        print(random_coordinate)
-        '''
-        for i in range(0, 2):
-            background = cv2.imread(background_list[i])
-            background = normalize(background)
-            for item_number in range(0, 10):
-                if i == 1:
-                    items[item_number] = l_items[item_number]
- # x,y는 시작점 좌표, h,w 는 item이미지의 높이와 너비
-                normalized_image = (normalize(img))
-                # append_items_json(synthesis_data, sysnthesis_image_number, item_number,x,y,w,h,item_seg)
-                for c_x in range(x, x + w):
-                    for c_y in range(y, y + h):
-                        background[c_y][c_x] = background[c_y][c_x] * normalized_image[c_y - y][c_x - x]
-            if i == 0:
-                cv2.imwrite(f"synthesis_high_data/{synthesis_image_number}.png", background)  # imwrite로 바꾸고 경로설정 다르게
-                cv2.imshow('h', background)
-            else: # todo : 이미지 파일을 읽었을때는 제대로 나오는데 저장하면 이상한 이미지가 저장됨
-                cv2.imwrite(f"synthesis_low_data/{synthesis_image_number}.png", background)
-                cv2.imshow('l', background)
-                append_items_json(synthesis_data, synthesis_image_number, item_number, x, y, w, h, item_seg)
+        high_path, low_path = get_background_image() # 경로임
+        high_background = cv2.imread(high_path)
+        low_background = cv2.imread(low_path)
+        high_background = normalize(high_background)
+        low_background = normalize(low_background)
+        h_b_h, h_b_w = high_background.shape[:2]
+        l_b_h, l_b_w = low_background.shape[:2]
+        append_background_json(synthesis_data, synthesis_image_number, h_b_w, h_b_h)  # TODO
+    #     # 위에서 랜덤값 지정 두번돌아가지 않도록
+        for item_number in range(0, 10):
+            high_img = cv2.imread(items[item_number])  # item 10개 각각 img로
+            low_img = cv2.imread(l_items[item_number])
+            h_x, h_y, h_h, h_w = get_random_coordinate(high_img, h_b_h, h_b_w)
+            l_x, l_y, l_h, l_w = get_random_coordinate(low_img, l_b_h, l_b_w)   # x,y는 시작점 좌표, h,w 는 item이미지의 높이와 너비
+            normalized_high_image = normalize(high_img)
+            normalized_low_image = normalize(low_img)
+            for c_x in range(h_x, h_x + h_w):
+                for c_y in range(h_y, h_y + h_h):
+                    high_background[c_y][c_x] = high_background[c_y][c_x] * normalized_high_image[c_y - h_y][c_x - h_x]
+
+            for c_x in range(l_x, l_x + l_w):
+                for c_y in range(l_y, l_y + l_h):
+                    low_background[c_y][c_x] = low_background[c_y][c_x] * normalized_low_image[c_y -l_y][c_x - l_x]
+            append_items_json(synthesis_data, synthesis_image_number, item_number, l_x, l_y, l_w, l_h, item_seg)
+        cv2.imwrite(f"synthesis_high_data/{synthesis_image_number}.png", high_background*256)
+        cv2.imwrite(f"synthesis_low_data/{synthesis_image_number}.png", low_background*256)
         print(synthesis_image_number)
         synthesis_image_number += 1
-        cv2.waitKey()
     with open('json/synthesis_data.json', 'w', encoding='utf-8') as file:
         json.dump(synthesis_data, file, indent=4)
 
 
-def normalize_background(background_list):
-    background = cv2.imread(background_list)
-    background = normalize(background)
-    return background
+def append_files_json(synthesis_data, synthesis_image_number):
+    synthesis_data['images'].append({
+        f"{synthesis_image_number}.png" : {
+            'background' : [],
+            'items' : []
+        }
+
+
+    })
+    synthesis_data['annotations'].append({
+        f"{synthesis_image_number}.png" : {
+            'items' : []
+        }
+
+    })
+def append_background_json(synthesis_data, synthesis_image_number, b_w, b_h):
+    synthesis_data['images'][synthesis_image_number][f"{synthesis_image_number}.png"]['background'].append({
+                        'id': synthesis_image_number,
+                        'dataset_id': '',
+                        'path': f"D:/wp/DW_intern/synthesis_high_data/{synthesis_image_number}.png",
+                        'file_name': f"{synthesis_image_number}.png",
+                        'width': b_w,
+                        'height': b_h
+    })
+    return synthesis_data
+
+def append_categories_json(synthesis_data,name,i):
+    synthesis_data['categories'].append({
+        'id' : i+1,
+        'name' : name[i],
+        'supercategory' : '',
+        'color' : '',
+        'metatdata' : ''
+    })
+def append_items_json(synthesis_data, sysnthesis_image_number, item_number, x, y, w, h, item_seg):
+    synthesis_data['images'][sysnthesis_image_number][f"{sysnthesis_image_number}.png"]['items'].append({
+            'id': f"{sysnthesis_image_number}-{item_number}",
+            'dataset_id': '',
+            'path': f"D:/wp/DW_intern/synthesis_high_data/{sysnthesis_image_number}.png",
+            'file_name': f"{sysnthesis_image_number}.png",
+            'width': w,
+            'height': h
+    })
+    synthesis_data['annotations'][sysnthesis_image_number][f"{sysnthesis_image_number}.png"]['items'].append({
+            'id': f"{sysnthesis_image_number}-{item_number}",
+            'category_id': '',
+            'bbox': [x, y, x + w, x + h],
+            'segmentation': item_seg,
+            'area': w * h,
+            'iscrowd': '',
+            'color' : '',
+            'unitID' : '',
+            'registNum' : '',
+            'number1' : '',
+            'number2' : '',
+            'weight' : ''
+    })
+    return synthesis_data
+
 
 
 def load_json(json_path):
@@ -90,26 +145,24 @@ def get_background_image():
     return high_img, low_img
 
 
-def get_random_coordinate(img, background):
-    b_h, b_w = background.shape[:2]
+def get_random_coordinate(img, b_h, b_w):
     h, w = img.shape[:2]
     new_x = round(random.uniform(0, b_w - w))
     new_y = round(random.uniform(0, b_h - h))
-    # print(b_h,b_w,h, w,new_x,new_y)
-    return new_x, new_y, h, w, b_h, b_w
+    return new_x, new_y, h, w,
 
 
 def get_ramdom_img(item_seg):
-    json_data = ['gun_json', 'battery_json','knife_json','laser_json']
-    data_files = ['ground_truth_gun_data', 'ground_truth_battery_data', 'ground_truth_knife_data',
-             'ground_truth_laser_point_data']
+    json_data = ['gun_json', 'battery_json', 'knife_json', 'laser_json']
+    data_files = ['ground_truth_gun_data_file', 'ground_truth_battery_data_file', 'ground_truth_knife_data_file',
+                  'ground_truth_laser_point_data_file']
     for i in range(4):
-        json_data[i] = load_json('json/'+data_files[i]+'.json')
+        json_data[i] = load_json('json/' + data_files[i] + '.json')
     h_items = []
     l_items = []
     file_numbers = []
     for i in range(0, 10):
-        file = random.randrange(0,4)
+        file = random.randrange(0, 4)
         files = data_files[file]
         file_number = random.randrange(0, 10000, 2)
         item_seg = {i: json_data[file]['annotations'][file_number]['segmentation']}
@@ -117,40 +170,6 @@ def get_ramdom_img(item_seg):
         h_items.append(files + f"/{file_number}.png")
         l_items.append(files + f"/{file_number + 1}.png")
     return h_items, l_items, file_numbers, item_seg
-
-
-def append_background_json(synthesis_data, synthesis_image_number, b_w, b_h):
-    synthesis_data['images'].append({
-        'background' : {'id': synthesis_image_number,
-        'dataset_id': '',
-        'path': f"D:/wp/DW_intern/synthesis_high_data/{synthesis_image_number}.png",
-        'file_name': f"{synthesis_image_number}.png",
-        'width': b_w,
-        'height': b_h},
-
-    })
-    return synthesis_data
-
-
-def append_items_json(synthesis_data, sysnthesis_image_number, item_number, x, y, w, h, item_seg):
-    synthesis_data['images'].append({
-        'items' : {
-        'id': f"{sysnthesis_image_number}-{item_number}",
-        'dataset_id': '',
-        'path': f"D:/wp/DW_intern/synthesis_high_data/{sysnthesis_image_number}.png",
-        'file_name': f"{sysnthesis_image_number}.png",
-        'width': w,
-        'height': h}
-    })
-    synthesis_data['annotations'].append({
-        'items' : {'id': f"{sysnthesis_image_number}-{item_number}",
-        'category_id': '',
-        'bbox': [x, y, x + w, x + h],
-        'segmentation': item_seg,
-        'area': w * h,
-        'iscrowd': ''}
-    })
-    return synthesis_data
 
 
 if __name__ == '__main__':
