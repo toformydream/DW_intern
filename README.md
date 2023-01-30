@@ -1,7 +1,7 @@
 # 2023-01-04 ~ 2023-02-24 Airiss Internship
 
  ### Installation
-<pre><code>{ https://github.com/airiss-data-analysis-with-intern/DW_intern.git}</code></pre>
+<pre><code>https://github.com/airiss-data-analysis-with-intern/DW_intern.git</code></pre>
  
  
 ## Tech/Framework Used
