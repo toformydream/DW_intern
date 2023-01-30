@@ -65,6 +65,6 @@ traitlets==5.8.0
 typing-extensions==4.4.0
 urllib3==1.26.13
 virtualenv==20.17.1
-wcwidth==0.2.5}</code></pre>
+wcwidth==0.2.5</code></pre>
 
 ## Explain
