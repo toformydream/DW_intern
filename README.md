@@ -1,5 +1,5 @@
 # 2023-01-04 ~ 2023-02-24 Airiss Internship
-##객체판별 인공지능 학습하기
+객체판별 인공지능 데이터 생성부터 학습까지
 
  ### Installation
 <pre><code>https://github.com/airiss-data-analysis-with-intern/DW_intern.git</code></pre>
