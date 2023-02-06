@@ -2,11 +2,6 @@ import random
 import cv2
 import json
 
-'''
-TODO
-imwrite 부분이랑 갑자기 까맣게나옴 확인할것.
-background.json까지 생성완료 합성된 사진에 background,item10개 json해서 업로드만 하면 끝!
-'''
 """
 1. 백그라운드 선택
 2. 이미지 선택
