@@ -23,8 +23,9 @@ def main():
     name = ['knife', 'gun', 'laser_pointer', 'battery']
     for i in range(0, 4):
         append_categories_json(synthesis_data, name, i)
-    while synthesis_image_number <2500:
+    while synthesis_image_number <7000:
         items, l_items, img_number, item_seg, category_id, iscrowd, color, unitID, registNum, number1, number2, weight = get_ramdom_img(item_seg)  # item 이미지와 이미지 넘버를 담은리스트
+        print(category_id)
         high_path, low_path = get_background_image() # 경로임
         high_background = normalize(high_path)
         low_background = normalize(low_path)
@@ -62,13 +63,13 @@ def main():
             for c_x in range(h_x, h_x + l_w):
                 for c_y in range(h_y, h_y + l_h):
                     low_background[c_y][c_x] = low_background[c_y][c_x] * normalized_low_image[c_y -h_y][c_x - h_x]
-            append_items_json(synthesis_data,synthesis_image_number,h_x, h_y, l_w, l_h, segmentation , json_item_number,category_id, iscrowd, color, unitID, registNum, number1, number2, weight)
+            append_items_json(synthesis_data,synthesis_image_number,h_x, h_y, l_w, l_h, segmentation , json_item_number,category_id[item_number], iscrowd, color, unitID, registNum, number1, number2, weight)
             json_item_number = json_item_number+1
-        cv2.imwrite(f"C:/DW_intern-main/mask_rcnn-main/mask_rcnn/train_high_synthesis/{synthesis_image_number}.png", high_background*256)
-        cv2.imwrite(f"C:/DW_intern-main/mask_rcnn-main?mask_rcnn/train_low_synthesis/{synthesis_image_number}.png", low_background*256)
+        cv2.imwrite(f"D:/wp/DW_intern/mask_rcnn/train_high_synthesis/{synthesis_image_number}.png", high_background*256)
+        cv2.imwrite(f"D:/wp/DW_intern/mask_rcnn/train_low_synthesis/{synthesis_image_number}.png", low_background*256)
         print(synthesis_image_number)
         synthesis_image_number += 1
-    with open('C:/DW_intern-main/mask_rcnn-main/mask_rcnn/json/train_synthesis.json', 'w', encoding='utf-8') as file:
+    with open('D:/wp/DW_intern/mask_rcnn/json/train_high_synthesis.json', 'w', encoding='utf-8') as file:
         json.dump(synthesis_data, file, indent=4)
 
 
@@ -91,7 +92,7 @@ def append_files_json(synthesis_data, synthesis_image_number, b_w, b_h):
     synthesis_data['images'].append({
         'id': synthesis_image_number,
         'dataset_id': '',
-        'path': f"C:/DW_intern-main/mask_rcnn-main/val_high_synthesis/{synthesis_image_number}.png",
+        'path': f"C:/DW_intern-main/high_synthesis/{synthesis_image_number}.png",
         'file_name': f"{synthesis_image_number}.png",
         'width': b_w,
         'height': b_h
@@ -142,8 +143,8 @@ def normalize(image):
 
 def get_background_image():
     count = random.randrange(1,5)
-    high_img = cv2.imread(f"C:/DW_intern-main/background/high_{count}.png")
-    low_img = cv2.imread(f"C:/DW_intern-main/background/low_{count}.png")
+    high_img = cv2.imread(f"D:/wp/DW_intern/background/high_{count}.png")
+    low_img = cv2.imread(f"D:/wp/DW_intern/background/low_{count}.png")
     resize_high = cv2.resize(high_img, dsize=(700,700), interpolation = cv2.INTER_AREA)
     resize_low = cv2.resize(low_img, dsize=(700, 700), interpolation=cv2.INTER_AREA)
     return resize_high,resize_low
@@ -162,15 +163,16 @@ def get_ramdom_img(item_seg):
     data_files = ['knife_data_file', 'gun_data_file', 'laser_data_file',
                   'battery_data_file']
     for i in range(4):
-        json_data[i] = load_json(f"C:/DW_intern-main/json/{json_path[i]}.json")
+        json_data[i] = load_json(f"D:/wp/DW_intern/json/{json_path[i]}.json")
     h_items = []
     l_items = []
+    category_id = []
     file_numbers = []
     for i in range(0, 10):
-        file = random.randrange(0,4)
+        file = random.randrange(0, 4)
         files = data_files[file]
         file_number = random.randrange(0, 9900, 2)
-        category_id = file+1
+        category_id.append(file+1)
         item_seg[i] = json_data[file]['annotations'][file_number]['segmentation']
         iscrowd = json_data[file]['annotations'][file_number]['iscrowd']
         color = json_data[file]['annotations'][file_number]['color']
@@ -180,8 +182,8 @@ def get_ramdom_img(item_seg):
         number2 = json_data[file]['annotations'][file_number]['number2']
         weight = json_data[file]['annotations'][file_number]['weight']
         file_numbers.append(file_number)
-        h_items.append(f"C:/DW_intern-main/{files}/{file_number}.png")
-        l_items.append(f"C:/DW_intern-main/{files}/{file_number + 1}.png")
+        h_items.append(f"D:/wp/DW_intern/{files}/{file_number}.png")
+        l_items.append(f"D:/wp/DW_intern/{files}/{file_number + 1}.png")
     return h_items, l_items, file_numbers, item_seg, category_id, iscrowd, color, unitID, registNum, number1, number2, weight
 
 
