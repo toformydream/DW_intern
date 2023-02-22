@@ -70,6 +70,7 @@ wcwidth==0.2.5</code></pre>
 
 ## Explain
 mask_rcnn/libary/config/train_config.py에서 
+absolute_path 본인의 경로에 맞게 수정
 
 train : 학습(많은 양의 학습데이터)
 
