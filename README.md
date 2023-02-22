@@ -70,10 +70,16 @@ wcwidth==0.2.5</code></pre>
 
 ## Explain
 mask_rcnn/libary/config/train_config.py에서 
+
 train : 학습(많은 양의 학습데이터)
+
 val : 검증(train data보다 적은 val data)
+
 model : train후 나올 모델
+
+
 경로 설정
+
 
 line 19에서 train batch size 조정
 line 31에서 epoch수 조정
